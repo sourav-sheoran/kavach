@@ -4,7 +4,11 @@
   "description": "India's First PQC Secured Defence Digital Platform",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "author": "Sourav Sheoran"
 }
