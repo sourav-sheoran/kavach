@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAVACH — Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1b2a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo { font-size: 48px; margin-bottom: 8px; }
+
+    .logo-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #c9a84c;
+      letter-spacing: 6px;
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: #a0b4c8;
+      margin-top: 4px;
+    }
+
+    .pqc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(46,204,113,0.1);
+      border: 1px solid rgba(46,204,113,0.3);
+      color: #2ecc71;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+      letter-spacing: 1px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(10px);
+    }
+
+    .step { display: none; }
+    .step.active {
+      display: block;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .step-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: #a0b4c8;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .input-group { margin-bottom: 20px; }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      color: #a0b4c8;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border 0.3s;
+    }
+
+    .input-wrapper:focus-within { border-color: #c9a84c; }
+
+    .input-prefix {
+      padding: 14px 16px;
+      color: #c9a84c;
+      font-weight: 600;
+      font-size: 15px;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 16px;
+      padding: 14px 16px;
+      letter-spacing: 2px;
+    }
+
+    .input-wrapper input::placeholder {
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0;
+    }
+
+    .otp-container {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .otp-box {
+      width: 52px;
+      height: 60px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #c9a84c;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .otp-box:focus {
+      border-color: #c9a84c;
+      background: rgba(201,168,76,0.1);
+      box-shadow: 0 0 12px rgba(201,168,76,0.2);
+    }
+
+    .otp-timer {
+      text-align: center;
+      font-size: 13px;
+      color: #a0b4c8;
+      margin-bottom: 20px;
+    }
+
+    .otp-timer span { color: #c9a84c; font-weight: 600; }
+
+    .demo-otp-box {
+      background: rgba(201,168,76,0.1);
+      border: 1px dashed #c9a84c;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #c9a84c;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .pqc-generating {
+      background: rgba(46,204,113,0.08);
+      border: 1px solid rgba(46,204,113,0.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #2ecc71;
+      text-align: center;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .role-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .role-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .role-card:hover {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(201,168,76,0.08);
+    }
+
+    .role-card.selected {
+      border-color: #c9a84c;
+      background: rgba(201,168,76,0.12);
+    }
+
+    .role-icon { font-size: 32px; width: 48px; text-align: center; }
+
+    .role-info h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .role-info p { font-size: 12px; color: #a0b4c8; }
+
+    .role-check {
+      margin-left: auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .role-card.selected .role-check {
+      background: #c9a84c;
+      border-color: #c9a84c;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #c9a84c, #f0d080);
+      color: #0d1b2a;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201,168,76,0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #a0b4c8;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
+
+    .error-msg {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid rgba(231,76,60,0.3);
+      color: #e74c3c;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #0d1b2a;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-section">
+    <div class="logo">🛡️</div>
+    <div class="logo-title">KAVACH</div>
+    <div class="logo-sub">Defence Digital Trust Platform</div>
+    <div class="pqc-badge">🔐 PQC Secured — Quantum Safe</div>
+  </div>
+
+  <div class="card">
+
+    <!-- STEP 1: Phone -->
+    <div class="step active" id="step1">
+      <h2 class="step-title">Welcome, Sainik 🙏</h2>
+      <p class="step-desc">
+        Apna mobile number enter karo —
+        hum aapko ek OTP bhejenge.
+      </p>
+
+      <div class="error-msg" id="error1"></div>
+
+      <div class="input-group">
+        <label>MOBILE NUMBER</label>
+        <div class="input-wrapper">
+          <span class="input-prefix">+91</span>
+          <input
+            type="tel"
+            id="phoneInput"
+            placeholder="Enter 10 digit number"
+            maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="sendOTP()" id="btn1">
+        SEND OTP →
+      </button>
+    </div>
+
+    <!-- STEP 2: OTP -->
+    <div class="step" id="step2">
+      <h2 class="step-title">OTP Verify Karo 🔐</h2>
+      <p class="step-desc" id="otpDesc">
+        +91 XXXXXXXXXX pe OTP bheja gaya hai।
+      </p>
+
+      <div class="error-msg" id="error2"></div>
+
+      <div class="demo-otp-box">
+        📱 Demo OTP: <strong id="demoOTPValue">------</strong>
+      </div>
+
+      <div class="pqc-generating" id="pqcGenerating">
+        🔐 Generating PQC Quantum-Safe Keypair...
+      </div>
+
+      <div class="otp-container">
+        <input class="otp-box" type="text" maxlength="1" id="otp1"
+          oninput="otpInput(this, 'otp2')" />
+        <input class="otp-box" type="text" maxlength="1" id="otp2"
+          oninput="otpInput(this, 'otp3')" />
+        <input class="otp-box" type="text" maxlength="1" id="otp3"
+          oninput="otpInput(this, 'otp4')" />
+        <input class="otp-box" type="text" maxlength="1" id="otp4"
+          oninput="otpInput(this, 'otp5')" />
+        <input class="otp-box" type="text" maxlength="1" id="otp5"
+          oninput="otpInput(this, 'otp6')" />
+        <input class="otp-box" type="text" maxlength="1" id="otp6"
+          oninput="otpInput(this, null)" />
+      </div>
+
+      <div class="otp-timer">
+        OTP valid hai <span id="timer">10:00</span> tak
+      </div>
+
+      <button class="btn-primary" onclick="verifyOTP()" id="btn2">
+        VERIFY OTP →
+      </button>
+
+      <button class="btn-secondary" onclick="goBack('step1')">
+        ← Change Number
+      </button>
+    </div>
+
+    <!-- STEP 3: Role -->
+    <div class="step" id="step3">
+      <h2 class="step-title">Aap kaun hain? 🎖️</h2>
+      <p class="step-desc">
+        Apni category select karo taaki hum
+        aapka experience personalize kar sakein।
+      </p>
+
+      <div class="error-msg" id="error3"></div>
+
+      <div class="role-grid">
+        <div class="role-card" onclick="selectRole('serving', this)">
+          <div class="role-icon">⚔️</div>
+          <div class="role-info">
+            <h3>Serving Personnel</h3>
+            <p>Currently serving in Indian Army</p>
+          </div>
+          <div class="role-check">✓</div>
+        </div>
+
+        <div class="role-card" onclick="selectRole('veteran', this)">
+          <div class="role-icon">🎖️</div>
+          <div class="role-info">
+            <h3>Veteran</h3>
+            <p>Retired from Indian Army</p>
+          </div>
+          <div class="role-check">✓</div>
+        </div>
+
+        <div class="role-card" onclick="selectRole('family', this)">
+          <div class="role-icon">👨‍👩‍👧</div>
+          <div class="role-info">
+            <h3>Family Member</h3>
+            <p>Family of serving / veteran</p>
+          </div>
+          <div class="role-check">✓</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="setRole()"
+        id="btn3" disabled>
+        CONTINUE →
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let selectedRole = null;
+  let timerInterval = null;
+
+  function otpInput(current, nextId) {
+    current.value = current.value.replace(/[^0-9]/g, '');
+    if (current.value && nextId) {
+      document.getElementById(nextId).focus();
+    }
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  }
+
+  function goBack(stepId) {
+    document.querySelectorAll('.step').forEach(s =>
+      s.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+  }
+
+  function startTimer() {
+    let seconds = 600;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      document.getElementById('timer').textContent = `${m}:${s}`;
+      if (seconds-- <= 0) clearInterval(timerInterval);
+    }, 1000);
+  }
+
+  async function sendOTP() {
+    const phone = document.getElementById('phoneInput').value;
+    if (phone.length !== 10) {
+      showError('error1', '❌ Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    const btn = document.getElementById('btn1');
+    btn.innerHTML = '<span class="loading"></span> Sending...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('otpDesc').textContent =
+          `+91 ${phone} pe OTP bheja gaya hai।`;
+        document.getElementById('demoOTPValue').textContent = data.demoOTP;
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+        document.getElementById('otp1').focus();
+        startTimer();
+      } else {
+        showError('error1', '❌ ' + data.message);
+      }
+    } catch (err) {
+      showError('error1', '❌ Server error. Please try again.');
+    }
+
+    btn.innerHTML = 'SEND OTP →';
+    btn.disabled = false;
+  }
+
+  async function verifyOTP() {
+    const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
+      .map(id => document.getElementById(id).value)
+      .join('');
+    const phone = document.getElementById('phoneInput').value;
+
+    if (otp.length !== 6) {
+      showError('error2', '❌ Please enter complete 6-digit OTP');
+      return;
+    }
+
+    const btn = document.getElementById('btn2');
+    btn.innerHTML = '<span class="loading"></span> Verifying...';
+    btn.disabled = true;
+
+    // Show PQC generating message
+    document.getElementById('pqcGenerating').style.display = 'block';
+
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Save all data to localStorage
+        localStorage.setItem('kavachToken', data.token);
+        localStorage.setItem('kavachUser', JSON.stringify(data.user));
+
+        // Save PQC private key
+        if (data.privateKey) {
+          localStorage.setItem('kavachPrivateKey', data.privateKey);
+          localStorage.setItem('kavachPQC', data.pqcEnabled);
+          console.log('✅ PQC Private Key saved to client');
+        }
+
+        document.getElementById('pqcGenerating').style.display = 'none';
+
+        if (data.user.role) {
+          window.location.href = '/dashboard.html';
+        } else {
+          document.getElementById('step2').classList.remove('active');
+          document.getElementById('step3').classList.add('active');
+        }
+      } else {
+        document.getElementById('pqcGenerating').style.display = 'none';
+        showError('error2', '❌ ' + data.message);
+      }
+    } catch (err) {
+      document.getElementById('pqcGenerating').style.display = 'none';
+      showError('error2', '❌ Server error. Please try again.');
+    }
+
+    btn.innerHTML = 'VERIFY OTP →';
+    btn.disabled = false;
+  }
+
+  function selectRole(role, el) {
+    selectedRole = role;
+    document.querySelectorAll('.role-card').forEach(c =>
+      c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('btn3').disabled = false;
+  }
+
+  async function setRole() {
+    if (!selectedRole) return;
+
+    const btn = document.getElementById('btn3');
+    btn.innerHTML = '<span class="loading"></span> Setting up...';
+    btn.disabled = true;
+
+    try {
+      const token = localStorage.getItem('kavachToken');
+      const res = await fetch('/api/auth/set-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: selectedRole })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('kavachUser', JSON.stringify(data.user));
+        window.location.href = '/verify.html';
+      } else {
+        showError('error3', '❌ ' + data.message);
+      }
+    } catch (err) {
+      showError('error3', '❌ Server error. Please try again.');
+    }
+
+    btn.innerHTML = 'CONTINUE →';
+    btn.disabled = false;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (document.getElementById('step1').classList.contains('active')) sendOTP();
+      if (document.getElementById('step2').classList.contains('active')) verifyOTP();
+      if (document.getElementById('step3').classList.contains('active')) setRole();
+    }
+  });
+</script>
+
+</body>
+</html>

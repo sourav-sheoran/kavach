@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAVACH — Verified Inbox</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1b2a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    /* HEADER */
+    .top-header {
+      background: linear-gradient(135deg, #1a3a5c, #0d1b2a);
+      padding: 24px 24px 32px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #c9a84c;
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: #a0b4c8;
+      margin-top: 2px;
+    }
+
+    .refresh-btn {
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: #c9a84c;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .refresh-btn:hover { background: rgba(201,168,76,0.25); }
+
+    /* TRUST BANNER */
+    .trust-banner {
+      background: rgba(46,204,113,0.1);
+      border: 1px solid rgba(46,204,113,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #2ecc71;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.5;
+    }
+
+    /* FILTER TABS */
+    .filter-section {
+      padding: 16px 24px 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filter-section::-webkit-scrollbar { display: none; }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      width: max-content;
+    }
+
+    .filter-tab {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a0b4c8;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-tab.active {
+      background: rgba(201,168,76,0.2);
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      padding: 16px 24px;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #a0b4c8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-pill span { color: #c9a84c; font-weight: 700; }
+
+    /* NEWS LIST */
+    .news-list { padding: 0 24px; }
+
+    .news-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .news-card:hover {
+      border-color: rgba(201,168,76,0.3);
+      background: rgba(201,168,76,0.04);
+      transform: translateY(-1px);
+    }
+
+    .news-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .source-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .source-tag {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .source-ECHS { background: rgba(52,152,219,0.2); color: #3498db; }
+    .source-CSD { background: rgba(155,89,182,0.2); color: #9b59b6; }
+    .source-AGIF { background: rgba(231,76,60,0.2); color: #e74c3c; }
+    .source-MOD { background: rgba(201,168,76,0.2); color: #c9a84c; }
+    .source-PIB { background: rgba(46,204,113,0.2); color: #2ecc71; }
+    .source-KSB { background: rgba(230,126,34,0.2); color: #e67e22; }
+
+    .verified-badge {
+      font-size: 10px;
+      color: #2ecc71;
+      background: rgba(46,204,113,0.1);
+      border: 1px solid rgba(46,204,113,0.2);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .news-date {
+      font-size: 11px;
+      color: #a0b4c8;
+      white-space: nowrap;
+    }
+
+    .news-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .news-content {
+      font-size: 13px;
+      color: #a0b4c8;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .news-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .category-tag {
+      font-size: 11px;
+      color: #a0b4c8;
+      background: rgba(255,255,255,0.05);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .read-more {
+      font-size: 12px;
+      color: #c9a84c;
+      font-weight: 600;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0b4c8;
+    }
+
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; line-height: 1.6; }
+
+    /* LOADING */
+    .loading-state {
+      text-align: center;
+      padding: 40px;
+      color: #a0b4c8;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(201,168,76,0.2);
+      border-top-color: #c9a84c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    /* NEWS MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 200;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.show { display: flex; align-items: flex-start; }
+
+    .modal {
+      background: #1a3a5c;
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 20px;
+      padding: 28px;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .modal-source { margin-bottom: 16px; }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .modal-content {
+      font-size: 14px;
+      color: #a0b4c8;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #c9a84c, #f0d080);
+      color: #0d1b2a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #a0b4c8;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(13,27,42,0.95);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      padding: 12px 0 16px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #a0b4c8;
+      transition: color 0.3s;
+    }
+
+    .nav-item.active { color: #c9a84c; }
+    .nav-icon { font-size: 22px; }
+    .nav-label { font-size: 10px; font-weight: 600; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="top-header">
+    <div class="header-top">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <div>
+        <div class="header-title">📬 Verified Inbox</div>
+        <div class="header-sub">Official Defence Communications</div>
+      </div>
+      <button class="refresh-btn" onclick="refreshFeed()" id="refreshBtn">🔄</button>
+    </div>
+
+    <div class="trust-banner">
+      🔒
+      <span>
+        Sirf verified govt sources se content aata hai.
+        <strong>Agar koi message yahan nahi hai — wo official nahi hai.</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-section">
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="filterNews('All', this)">🗂️ All</div>
+      <div class="filter-tab" onclick="filterNews('Defence', this)">⚔️ Defence</div>
+      <div class="filter-tab" onclick="filterNews('Medical', this)">🏥 ECHS</div>
+      <div class="filter-tab" onclick="filterNews('Canteen', this)">🛒 CSD</div>
+      <div class="filter-tab" onclick="filterNews('Insurance', this)">🛡️ AGIF</div>
+      <div class="filter-tab" onclick="filterNews('Welfare', this)">❤️ Welfare</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-pill">Total: <span id="totalCount">—</span></div>
+    <div class="stat-pill">✅ All Verified</div>
+    <div class="stat-pill">🕐 Updated <span id="lastUpdate">now</span></div>
+  </div>
+
+  <!-- NEWS LIST -->
+  <div class="news-list" id="newsList">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      Loading verified updates...
+    </div>
+  </div>
+
+  <!-- NEWS MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-source" id="modalSource"></div>
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      </div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-content" id="modalContent"></div>
+      <div class="modal-footer">
+        <button class="btn-gold" id="modalLink" onclick="openOriginal()">
+          🔗 Read Full Article
+        </button>
+        <button class="btn-ghost" onclick="closeModalDirect()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="/dashboard.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </a>
+    <a href="/inbox.html" class="nav-item active">
+      <div class="nav-icon">📬</div>
+      <div class="nav-label">Inbox</div>
+    </a>
+    <a href="/card.html" class="nav-item">
+      <div class="nav-icon">🪪</div>
+      <div class="nav-label">My Card</div>
+    </a>
+    <a href="/station.html" class="nav-item">
+      <div class="nav-icon">📍</div>
+      <div class="nav-label">Station</div>
+    </a>
+  </div>
+
+<script>
+  const token = localStorage.getItem('kavachToken');
+  if (!token) window.location.href = '/login.html';
+
+  let allNews = [];
+  let currentFilter = 'All';
+  let currentArticle = null;
+
+  function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
+  function renderNews(news) {
+    if (news.length === 0) {
+      document.getElementById('newsList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">No updates found</div>
+          <div class="empty-desc">Is category mein abhi koi update nahi hai.<br/>
+          Baad mein check karein.</div>
+        </div>`;
+      return;
+    }
+
+    const html = news.map((item, i) => `
+      <div class="news-card" onclick="openNews(${i})"
+        style="animation-delay:${i * 0.05}s">
+        <div class="news-card-top">
+          <div class="source-badge">
+            <span class="source-tag source-${item.source}">
+              ${item.source}
+            </span>
+            <span class="verified-badge">✅ Verified</span>
+          </div>
+          <span class="news-date">${timeAgo(item.publishedAt)}</span>
+        </div>
+        <div class="news-title">${item.title}</div>
+        ${item.content ?
+          `<div class="news-content">${item.content}</div>` : ''}
+        <div class="news-card-bottom">
+          <span class="category-tag">${item.category}</span>
+          <span class="read-more">Read more →</span>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('newsList').innerHTML = html;
+  }
+
+  async function loadNews(category = 'All') {
+    document.getElementById('newsList').innerHTML = `
+      <div class="loading-state">
+        <div class="spinner"></div>
+        Loading verified updates...
+      </div>`;
+
+    try {
+      const url = category === 'All'
+        ? '/api/inbox/feed'
+        : `/api/inbox/feed?category=${category}`;
+
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        allNews = data.data;
+        document.getElementById('totalCount').textContent = allNews.length;
+        document.getElementById('lastUpdate').textContent = 'just now';
+        renderNews(allNews);
+      }
+    } catch (err) {
+      document.getElementById('newsList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <div class="empty-title">Could not load updates</div>
+          <div class="empty-desc">Server se connect nahi ho pa raha.<br/>
+          Please retry karein.</div>
+        </div>`;
+    }
+  }
+
+  function filterNews(category, el) {
+    currentFilter = category;
+    document.querySelectorAll('.filter-tab').forEach(t =>
+      t.classList.remove('active'));
+    el.classList.add('active');
+    loadNews(category);
+  }
+
+  async function refreshFeed() {
+    const btn = document.getElementById('refreshBtn');
+    btn.textContent = '⏳';
+    btn.disabled = true;
+
+    try {
+      await fetch('/api/inbox/refresh', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      await loadNews(currentFilter);
+    } catch (err) {
+      console.error(err);
+    }
+
+    btn.textContent = '🔄';
+    btn.disabled = false;
+  }
+
+  function openNews(index) {
+    const item = allNews[index];
+    currentArticle = item;
+
+    document.getElementById('modalSource').innerHTML = `
+      <span class="source-tag source-${item.source}">${item.source}</span>
+      <span class="verified-badge" style="margin-left:8px">✅ Verified</span>
+    `;
+    document.getElementById('modalTitle').textContent = item.title;
+    document.getElementById('modalContent').textContent =
+      item.content || 'Full content ke liye original source pe jaayein.';
+
+    document.getElementById('modalOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) {
+      closeModalDirect();
+    }
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function openOriginal() {
+    if (currentArticle && currentArticle.originalUrl) {
+      window.open(currentArticle.originalUrl, '_blank');
+    }
+  }
+
+  loadNews();
+</script>
+
+</body>
+</html>

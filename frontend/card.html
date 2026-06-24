@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAVACH — My Card</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1b2a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; color: #c9a84c; }
+    .header-sub { font-size: 12px; color: #a0b4c8; }
+
+    .content { padding: 0 24px 24px; }
+
+    /* QUANTUM BADGE */
+    .quantum-banner {
+      background: linear-gradient(135deg, rgba(46,204,113,0.1), rgba(46,204,113,0.05));
+      border: 1px solid rgba(46,204,113,0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #2ecc71;
+    }
+
+    /* MAIN CARD */
+    .kavach-card {
+      background: linear-gradient(135deg, #1a3a5c 0%, #0d2a45 50%, #1a3a5c 100%);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 24px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      id: "kavachCardEl"
+    }
+
+    .kavach-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(201,168,76,0.12), transparent);
+      border-radius: 50%;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .card-brand { font-size: 10px; color: #c9a84c; letter-spacing: 4px; font-weight: 700; }
+    .card-full-name { font-size: 12px; color: rgba(201,168,76,0.6); margin-top: 2px; }
+    .card-flag { font-size: 28px; }
+
+    .card-verified-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .card-verified {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .verified { background: rgba(46,204,113,0.2); color: #2ecc71; border: 1px solid rgba(46,204,113,0.4); }
+    .pending { background: rgba(255,193,7,0.2); color: #ffc107; border: 1px solid rgba(255,193,7,0.4); }
+
+    .pqc-stamp {
+      font-size: 9px;
+      color: #2ecc71;
+      background: rgba(46,204,113,0.1);
+      border: 1px solid rgba(46,204,113,0.2);
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+
+    .card-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .card-rank-regiment { font-size: 14px; color: #c9a84c; margin-bottom: 20px; font-weight: 600; }
+
+    .card-divider { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 20px; }
+
+    .card-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card-info-item label {
+      font-size: 9px;
+      color: #a0b4c8;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .card-info-item span { font-size: 13px; font-weight: 700; }
+    .gold { color: #c9a84c; }
+    .green { color: #2ecc71; }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .card-id-section label {
+      font-size: 9px;
+      color: #a0b4c8;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .card-id-value { font-size: 16px; font-weight: 800; color: #c9a84c; letter-spacing: 3px; }
+
+    .card-service-number { text-align: right; }
+    .card-service-number label {
+      font-size: 9px;
+      color: #a0b4c8;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .card-service-number span { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); }
+
+    /* QUANTUM SECURITY STRIP */
+    .quantum-strip {
+      background: linear-gradient(90deg, rgba(46,204,113,0.15), rgba(46,204,113,0.05), rgba(46,204,113,0.15));
+      border-top: 1px solid rgba(46,204,113,0.2);
+      margin: 20px -28px -28px;
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quantum-strip-text {
+      font-size: 9px;
+      color: #2ecc71;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+
+    .quantum-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .qdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2ecc71;
+      animation: blink 1.5s infinite;
+    }
+
+    .qdot:nth-child(2) { animation-delay: 0.3s; }
+    .qdot:nth-child(3) { animation-delay: 0.6s; }
+
+    /* QR SECTION */
+    .qr-section {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .qr-title { font-size: 13px; color: #a0b4c8; letter-spacing: 2px; margin-bottom: 20px; }
+
+    #qrcode {
+      display: inline-block;
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+
+    .qr-desc { font-size: 12px; color: #a0b4c8; line-height: 1.6; }
+
+    /* ACTION BUTTONS */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .action-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .action-btn:hover {
+      border-color: rgba(201,168,76,0.4);
+      background: rgba(201,168,76,0.08);
+    }
+
+    .action-btn.gold-btn {
+      background: linear-gradient(135deg, #c9a84c, #f0d080);
+      color: #0d1b2a;
+      border: none;
+      font-weight: 700;
+    }
+
+    .action-btn .icon { font-size: 24px; }
+
+    /* WHERE TO USE */
+    .use-section {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .use-title { font-size: 13px; color: #c9a84c; letter-spacing: 2px; margin-bottom: 16px; }
+
+    .use-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .use-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #a0b4c8;
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(13,27,42,0.95);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      padding: 12px 0 16px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: #a0b4c8;
+      transition: color 0.3s;
+    }
+
+    .nav-item.active { color: #c9a84c; }
+    .nav-icon { font-size: 22px; }
+    .nav-label { font-size: 10px; font-weight: 600; }
+
+    /* PRINT STYLES */
+    @media print {
+      body { background: white; color: black; }
+      .bottom-nav, .action-grid, .qr-section, .use-section,
+      .header, .quantum-banner { display: none; }
+      .kavach-card { box-shadow: none; border: 2px solid #1a3a5c; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .animate { animation: fadeInUp 0.5s ease; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <button class="back-btn" onclick="history.back()">←</button>
+    <div>
+      <div class="header-title">🪪 My KAVACH Card</div>
+      <div class="header-sub">Defence Digital Identity</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- QUANTUM BANNER -->
+    <div class="quantum-banner">
+      🔐 <span><strong>PQC Secured</strong> — CRYSTALS-Kyber Encrypted • Quantum-Safe Digital Identity</span>
+    </div>
+
+    <!-- MAIN KAVACH CARD -->
+    <div class="kavach-card animate" id="kavachCardEl">
+      <div class="card-header">
+        <div>
+          <div class="card-brand">🛡️ KAVACH</div>
+          <div class="card-full-name">Defence Digital Identity</div>
+        </div>
+        <div class="card-verified-section">
+          <div class="card-flag">🇮🇳</div>
+          <div class="card-verified" id="verifiedBadge">⏳ PENDING</div>
+          <div class="pqc-stamp" id="pqcStamp">🔐 PQC SECURED</div>
+        </div>
+      </div>
+
+      <div class="card-name" id="cardName">—</div>
+      <div class="card-rank-regiment" id="cardRankRegiment">— | —</div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-info-grid">
+        <div class="card-info-item">
+          <label>ROLE</label>
+          <span class="gold" id="cardRole">—</span>
+        </div>
+        <div class="card-info-item">
+          <label>ECHS</label>
+          <span class="green" id="cardECHS">—</span>
+        </div>
+        <div class="card-info-item">
+          <label>CSD</label>
+          <span class="green" id="cardCSD">—</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="card-id-section">
+          <label>KAVACH CARD ID</label>
+          <div class="card-id-value" id="cardId">KVH-——</div>
+        </div>
+        <div class="card-service-number">
+          <label>SERVICE NUMBER</label>
+          <span id="cardServiceNo">—</span>
+        </div>
+      </div>
+
+      <!-- QUANTUM SECURITY STRIP -->
+      <div class="quantum-strip">
+        <div class="quantum-dots">
+          <div class="qdot"></div>
+          <div class="qdot"></div>
+          <div class="qdot"></div>
+        </div>
+        <div class="quantum-strip-text">CRYSTALS-KYBER • POST QUANTUM CRYPTOGRAPHY</div>
+        <div class="quantum-strip-text" id="sigStrip">SIG: VERIFYING...</div>
+      </div>
+    </div>
+
+    <!-- QR CODE -->
+    <div class="qr-section animate">
+      <div class="qr-title">📱 SCAN QR CODE</div>
+      <div id="qrcode"></div>
+      <div class="qr-desc">
+        Is QR code ko scan karo verification ke liye<br/>
+        CSD Canteen • ECHS Hospital • Railway Counter
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-grid">
+      <button class="action-btn gold-btn" onclick="downloadCard()">
+        <div class="icon">⬇️</div>
+        Download Card
+      </button>
+      <button class="action-btn" onclick="shareCard()">
+        <div class="icon">📤</div>
+        Share Card
+      </button>
+      <button class="action-btn" onclick="showQRFullscreen()">
+        <div class="icon">🔍</div>
+        Fullscreen QR
+      </button>
+      <button class="action-btn" onclick="window.print()">
+        <div class="icon">🖨️</div>
+        Print Card
+      </button>
+    </div>
+
+    <!-- WHERE TO USE -->
+    <div class="use-section">
+      <div class="use-title">📍 KAHAN USE KAREIN</div>
+      <div class="use-grid">
+        <div class="use-item"><span style="font-size:20px">🛒</span> CSD Canteen</div>
+        <div class="use-item"><span style="font-size:20px">🏥</span> ECHS Hospital</div>
+        <div class="use-item"><span style="font-size:20px">🚆</span> Railway Counter</div>
+        <div class="use-item"><span style="font-size:20px">🏫</span> School Admission</div>
+        <div class="use-item"><span style="font-size:20px">✈️</span> Airport Check-in</div>
+        <div class="use-item"><span style="font-size:20px">🏦</span> Bank Concession</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="/dashboard.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </a>
+    <a href="/inbox.html" class="nav-item">
+      <div class="nav-icon">📬</div>
+      <div class="nav-label">Inbox</div>
+    </a>
+    <a href="/card.html" class="nav-item active">
+      <div class="nav-icon">🪪</div>
+      <div class="nav-label">My Card</div>
+    </a>
+    <a href="/station.html" class="nav-item">
+      <div class="nav-icon">📍</div>
+      <div class="nav-label">Station</div>
+    </a>
+  </div>
+
+<script>
+  const token = localStorage.getItem('kavachToken');
+  if (!token) window.location.href = '/login.html';
+
+  const identity = JSON.parse(localStorage.getItem('kavachIdentity') || '{}');
+  const roleMap = { serving: 'Serving', veteran: 'Veteran', family: 'Family' };
+
+  async function loadCard() {
+    try {
+      const res = await fetch('/api/identity/card', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const id = data.data.identity;
+
+        document.getElementById('cardName').textContent = id.name;
+        document.getElementById('cardRankRegiment').textContent =
+          `${id.rank} | ${id.regiment}`;
+        document.getElementById('cardRole').textContent =
+          roleMap[id.role] || id.role;
+        document.getElementById('cardECHS').textContent = id.echsStatus;
+        document.getElementById('cardCSD').textContent =
+          id.csdEligible ? 'Eligible ✅' : 'Not Eligible';
+        document.getElementById('cardId').textContent = id.kavachCardId;
+        document.getElementById('cardServiceNo').textContent = id.serviceNumber;
+
+        // Verification status
+        if (id.verificationStatus === 'verified') {
+          const badge = document.getElementById('verifiedBadge');
+          badge.textContent = '✅ VERIFIED';
+          badge.className = 'card-verified verified';
+        }
+
+        // PQC signature strip
+        if (data.signatureValid) {
+          document.getElementById('sigStrip').textContent =
+            'SIG: VALID ✅';
+        } else {
+          document.getElementById('sigStrip').textContent =
+            'SIG: PENDING';
+        }
+
+        // PQC stamp
+        if (data.pqcDecrypted) {
+          document.getElementById('pqcStamp').textContent =
+            '🔐 KYBER DECRYPTED';
+        }
+
+        generateQR(id);
+        localStorage.setItem('kavachIdentity', JSON.stringify(id));
+      }
+    } catch (err) {
+      // Fallback to localStorage
+      if (identity.name) {
+        document.getElementById('cardName').textContent = identity.name;
+        document.getElementById('cardRankRegiment').textContent =
+          `${identity.rank || '—'} | ${identity.regiment || '—'}`;
+        document.getElementById('cardRole').textContent =
+          roleMap[identity.role] || '—';
+        document.getElementById('cardECHS').textContent =
+          identity.echsStatus || 'Active';
+        document.getElementById('cardCSD').textContent =
+          identity.csdEligible ? 'Eligible ✅' : 'Not Eligible';
+        document.getElementById('cardId').textContent =
+          identity.kavachCardId || 'KVH-——';
+        document.getElementById('cardServiceNo').textContent =
+          identity.serviceNumber || '—';
+        generateQR(identity);
+      }
+    }
+  }
+
+  function generateQR(data) {
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), {
+      text: JSON.stringify({
+        platform: 'KAVACH',
+        cardId: data.kavachCardId,
+        name: data.name,
+        rank: data.rank,
+        regiment: data.regiment,
+        serviceNumber: data.serviceNumber,
+        echs: data.echsStatus,
+        pqcSecured: true,
+        verified: data.verificationStatus === 'verified'
+      }),
+      width: 200,
+      height: 200,
+      colorDark: '#0d1b2a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function downloadCard() {
+    // Create printable version
+    const cardEl = document.getElementById('kavachCardEl');
+    const name = document.getElementById('cardName').textContent;
+    const cardId = document.getElementById('cardId').textContent;
+    const rank = document.getElementById('cardRankRegiment').textContent;
+    const role = document.getElementById('cardRole').textContent;
+    const echs = document.getElementById('cardECHS').textContent;
+    const serviceNo = document.getElementById('cardServiceNo').textContent;
+    const qrImg = document.querySelector('#qrcode img')?.src || '';
+
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>KAVACH Card — ${name}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: 'Segoe UI', sans-serif;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+          }
+          .card {
+            background: linear-gradient(135deg, #1a3a5c, #0d2a45);
+            color: white;
+            border-radius: 20px;
+            padding: 32px;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          }
+          .top { display: flex; justify-content: space-between; margin-bottom: 24px; }
+          .brand { font-size: 10px; color: #c9a84c; letter-spacing: 4px; font-weight: 700; }
+          .verified { color: #2ecc71; font-size: 11px; font-weight: 700;
+            background: rgba(46,204,113,0.2); padding: 4px 12px;
+            border-radius: 20px; border: 1px solid rgba(46,204,113,0.4); }
+          .name { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+          .rank { font-size: 14px; color: #c9a84c; margin-bottom: 20px; }
+          .divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 20px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+          .item label { font-size: 9px; color: #a0b4c8; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+          .item span { font-size: 13px; font-weight: 700; color: #2ecc71; }
+          .footer { display: flex; justify-content: space-between; align-items: center; }
+          .card-id { font-size: 18px; font-weight: 800; color: #c9a84c; letter-spacing: 3px; }
+          .card-id label { font-size: 9px; color: #a0b4c8; display: block; margin-bottom: 4px; }
+          img { border-radius: 8px; background: white; padding: 8px; }
+          .quantum {
+            background: rgba(46,204,113,0.1);
+            border-top: 1px solid rgba(46,204,113,0.2);
+            margin: 20px -32px -32px;
+            padding: 10px 32px;
+            font-size: 9px;
+            color: #2ecc71;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="top">
+            <div>
+              <div class="brand">🛡️ KAVACH</div>
+              <div style="font-size:11px;color:rgba(201,168,76,0.6);margin-top:2px">Defence Digital Identity</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:24px">🇮🇳</div>
+              <div class="verified">✅ VERIFIED</div>
+            </div>
+          </div>
+          <div class="name">${name}</div>
+          <div class="rank">${rank}</div>
+          <div class="divider"></div>
+          <div class="grid">
+            <div class="item"><label>ROLE</label><span style="color:#c9a84c">${role}</span></div>
+            <div class="item"><label>ECHS</label><span>${echs}</span></div>
+            <div class="item"><label>SERVICE NO</label><span style="color:white">${serviceNo}</span></div>
+          </div>
+          <div class="footer">
+            <div class="card-id">
+              <label>KAVACH CARD ID</label>
+              ${cardId}
+            </div>
+            ${qrImg ? `<img src="${qrImg}" width="80" height="80" />` : ''}
+          </div>
+          <div class="quantum">
+            <span>🔐 CRYSTALS-KYBER • POST QUANTUM CRYPTOGRAPHY</span>
+            <span>SIG: VALID ✅</span>
+          </div>
+        </div>
+        <script>
+          window.onload = () => {
+            setTimeout(() => window.print(), 500);
+          }
+        <\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  }
+
+  function shareCard() {
+    const cardId = document.getElementById('cardId').textContent;
+    if (navigator.share) {
+      navigator.share({
+        title: 'My KAVACH Card',
+        text: `KAVACH Defence Digital Identity\nCard ID: ${cardId}\n🔐 PQC Secured`,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(`KAVACH Card ID: ${cardId}`);
+      alert('✅ Card ID copied to clipboard!');
+    }
+  }
+
+  function showQRFullscreen() {
+    const qr = document.getElementById('qrcode').innerHTML;
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <html>
+        <body style="background:#0d1b2a;display:flex;flex-direction:column;
+          align-items:center;justify-content:center;height:100vh;margin:0;gap:16px">
+          <div style="background:white;padding:20px;border-radius:16px">${qr}</div>
+          <div style="color:#c9a84c;font-family:sans-serif;font-size:14px">
+            🔐 KAVACH — PQC Secured QR Code
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
+  loadCard();
+</script>
+
+</body>
+</html>

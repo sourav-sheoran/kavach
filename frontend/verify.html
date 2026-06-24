@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAVACH — Identity Verification</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1b2a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #c9a84c;
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: #a0b4c8;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 32px;
+      gap: 0;
+    }
+
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    .progress-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #a0b4c8;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .progress-circle.active {
+      background: #c9a84c;
+      border-color: #c9a84c;
+      color: #0d1b2a;
+    }
+
+    .progress-circle.done {
+      background: #2ecc71;
+      border-color: #2ecc71;
+      color: #fff;
+    }
+
+    .progress-label {
+      font-size: 10px;
+      color: #a0b4c8;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .progress-line {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+
+    .progress-line.done {
+      background: #2ecc71;
+    }
+
+    /* Form Steps */
+    .step { display: none; }
+    .step.active {
+      display: block;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .section-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      color: #c9a84c;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: #a0b4c8;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      padding: 12px 16px;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    .form-group select option {
+      background: #1a3a5c;
+      color: #fff;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #c9a84c;
+    }
+
+    .form-group input::placeholder {
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed rgba(201, 168, 76, 0.3);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: #c9a84c;
+      background: rgba(201, 168, 76, 0.05);
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon { font-size: 36px; margin-bottom: 12px; }
+
+    .upload-text {
+      font-size: 14px;
+      color: #a0b4c8;
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 12px;
+      color: rgba(160, 180, 200, 0.5);
+    }
+
+    .upload-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 12px;
+    }
+
+    .upload-preview.show { display: flex; }
+
+    /* Role specific sections */
+    .role-section { display: none; }
+    .role-section.show { display: block; }
+
+    /* Review Card */
+    .review-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .review-item:last-child { border-bottom: none; }
+
+    .review-label {
+      font-size: 12px;
+      color: #a0b4c8;
+    }
+
+    .review-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Success Screen */
+    .success-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      font-size: 80px;
+      margin-bottom: 24px;
+      animation: bounce 0.6s ease;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2ecc71;
+      margin-bottom: 12px;
+    }
+
+    .success-desc {
+      font-size: 14px;
+      color: #a0b4c8;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .card-id-box {
+      background: rgba(201, 168, 76, 0.1);
+      border: 1px solid #c9a84c;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 32px;
+    }
+
+    .card-id-label {
+      font-size: 11px;
+      color: #a0b4c8;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .card-id-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #c9a84c;
+      letter-spacing: 4px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #c9a84c, #f0d080);
+      color: #0d1b2a;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201, 168, 76, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #a0b4c8;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #0d1b2a;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .error-msg {
+      background: rgba(231, 76, 60, 0.1);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #e74c3c;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <div>
+    <div class="header-title">🛡️ KAVACH Identity</div>
+    <div class="header-sub">Defence Digital Identity Verification</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-step">
+      <div class="progress-circle active" id="pc1">1</div>
+      <div class="progress-label">Details</div>
+    </div>
+    <div class="progress-line" id="pl1"></div>
+    <div class="progress-step">
+      <div class="progress-circle" id="pc2">2</div>
+      <div class="progress-label">Documents</div>
+    </div>
+    <div class="progress-line" id="pl2"></div>
+    <div class="progress-step">
+      <div class="progress-circle" id="pc3">3</div>
+      <div class="progress-label">Review</div>
+    </div>
+    <div class="progress-line" id="pl3"></div>
+    <div class="progress-step">
+      <div class="progress-circle" id="pc4">4</div>
+      <div class="progress-label">Done</div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- STEP 1: Personal Details -->
+  <div class="step active" id="step1">
+    <div class="section-card">
+      <div class="section-title">🎖️ BASIC INFORMATION</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>FULL NAME *</label>
+          <input type="text" id="name" placeholder="As per service ID" />
+        </div>
+        <div class="form-group">
+          <label>SERVICE NUMBER *</label>
+          <input type="text" id="serviceNumber" placeholder="e.g. IC-123456" />
+        </div>
+        <div class="form-group">
+          <label>RANK *</label>
+          <select id="rank">
+            <option value="">Select Rank</option>
+            <optgroup label="Officers">
+              <option>General</option>
+              <option>Lieutenant General</option>
+              <option>Major General</option>
+              <option>Brigadier</option>
+              <option>Colonel</option>
+              <option>Lieutenant Colonel</option>
+              <option>Major</option>
+              <option>Captain</option>
+              <option>Lieutenant</option>
+            </optgroup>
+            <optgroup label="JCOs">
+              <option>Subedar Major</option>
+              <option>Subedar</option>
+              <option>Naib Subedar</option>
+            </optgroup>
+            <optgroup label="OR">
+              <option>Havildar</option>
+              <option>Naik</option>
+              <option>Lance Naik</option>
+              <option>Sepoy / Rifleman / Gunner</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>REGIMENT / CORPS *</label>
+          <input type="text" id="regiment" placeholder="e.g. 3 RAJPUT" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Serving specific -->
+    <div class="section-card role-section" id="servingSection">
+      <div class="section-title">⚔️ SERVING DETAILS</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>CURRENT POSTING</label>
+          <input type="text" id="currentPosting" placeholder="e.g. Pune Cantonment" />
+        </div>
+        <div class="form-group">
+          <label>UNIT</label>
+          <input type="text" id="unit" placeholder="e.g. 3 RAJPUT" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Veteran specific -->
+    <div class="section-card role-section" id="veteranSection">
+      <div class="section-title">🎖️ VETERAN DETAILS</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>DISCHARGE YEAR</label>
+          <input type="text" id="dischargeYear" placeholder="e.g. 2018" />
+        </div>
+        <div class="form-group">
+          <label>PPO NUMBER</label>
+          <input type="text" id="ppoNumber" placeholder="Pension Payment Order" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Family specific -->
+    <div class="section-card role-section" id="familySection">
+      <div class="section-title">👨‍👩‍👧 FAMILY DETAILS</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>RELATION</label>
+          <select id="relation">
+            <option value="">Select</option>
+            <option>Wife</option>
+            <option>Son</option>
+            <option>Daughter</option>
+            <option>Parent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>LINKED SERVICE NUMBER</label>
+          <input type="text" id="linkedServiceNumber" placeholder="Soldier's service no." />
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🏥 ECHS & CSD</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>ECHS STATUS</label>
+          <select id="echsStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>CSD ELIGIBLE</label>
+          <select id="csdEligible">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="goToStep2()">
+      NEXT — Upload Documents →
+    </button>
+  </div>
+
+  <!-- STEP 2: Document Upload -->
+  <div class="step" id="step2">
+    <div class="section-card">
+      <div class="section-title">📄 UPLOAD IDENTITY DOCUMENT</div>
+
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="docFile" accept=".jpg,.jpeg,.png,.pdf"
+          onchange="handleFileUpload(this)" />
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">Click to upload your document</div>
+        <div class="upload-sub">Service ID / Discharge Certificate / Family ID<br/>JPG, PNG or PDF • Max 5MB</div>
+      </div>
+
+      <div class="upload-preview" id="uploadPreview">
+        <span style="font-size:24px">✅</span>
+        <div>
+          <div style="font-size:14px;font-weight:600" id="fileName">document.pdf</div>
+          <div style="font-size:12px;color:#a0b4c8" id="fileSize">2.3 MB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">ℹ️ DOCUMENT GUIDELINES</div>
+      <div style="font-size:13px;color:#a0b4c8;line-height:1.8">
+        ✅ Document clearly visible hona chahiye<br/>
+        ✅ Name aur service number match karna chahiye<br/>
+        ✅ File size 5MB se kam honi chahiye<br/>
+        ❌ Blurry ya cropped documents accept nahi honge
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="goToStep3()">
+      NEXT — Review Details →
+    </button>
+    <button class="btn-secondary" onclick="goBack(1)">← Back</button>
+  </div>
+
+  <!-- STEP 3: Review -->
+  <div class="step" id="step3">
+    <div class="section-card">
+      <div class="section-title">👀 REVIEW YOUR DETAILS</div>
+
+      <div class="review-item">
+        <span class="review-label">Full Name</span>
+        <span class="review-value" id="r-name">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Service Number</span>
+        <span class="review-value" id="r-service">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Rank</span>
+        <span class="review-value" id="r-rank">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Regiment / Corps</span>
+        <span class="review-value" id="r-regiment">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Role</span>
+        <span class="review-value" id="r-role">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">ECHS Status</span>
+        <span class="review-value" id="r-echs">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">CSD Eligible</span>
+        <span class="review-value" id="r-csd">—</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Document</span>
+        <span class="review-value" id="r-doc">—</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:16px;margin-bottom:16px;font-size:13px;color:#a0b4c8;line-height:1.7">
+      ⚠️ Submit karne ke baad details verify ki jaayengi. 
+      Verification mein 24-48 ghante lag sakte hain. 
+      Tab tak aap KAVACH ka use kar sakte hain.
+    </div>
+
+    <button class="btn-primary" onclick="submitIdentity()" id="submitBtn">
+      ✅ SUBMIT FOR VERIFICATION
+    </button>
+    <button class="btn-secondary" onclick="goBack(2)">← Back</button>
+  </div>
+
+  <!-- STEP 4: Success -->
+  <div class="step" id="step4">
+    <div class="success-screen">
+      <div class="success-icon">🎉</div>
+      <h2 class="success-title">Identity Submitted!</h2>
+      <p class="success-desc">
+        Aapki KAVACH Digital Identity successfully submit ho gayi hai।<br/>
+        Aapka KAVACH Card ID hai:
+      </p>
+
+      <div class="card-id-box">
+        <div class="card-id-label">KAVACH CARD ID</div>
+        <div class="card-id-value" id="cardIdDisplay">KVH-XXXXXXXX</div>
+      </div>
+
+      <button class="btn-primary" onclick="window.location.href='/card.html'">
+        🪪 View My KAVACH Card →
+      </button>
+      <button class="btn-secondary" onclick="window.location.href='/dashboard.html'">
+        Go to Dashboard
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const user = JSON.parse(localStorage.getItem('kavachUser') || '{}');
+  const role = user.role || 'serving';
+
+  // Show role-specific section
+  window.onload = () => {
+    if (role === 'serving') {
+      document.getElementById('servingSection').classList.add('show');
+    } else if (role === 'veteran') {
+      document.getElementById('veteranSection').classList.add('show');
+    } else if (role === 'family') {
+      document.getElementById('familySection').classList.add('show');
+    }
+  };
+
+  function updateProgress(step) {
+    for (let i = 1; i <= 4; i++) {
+      const circle = document.getElementById(`pc${i}`);
+      circle.classList.remove('active', 'done');
+      if (i < step) circle.classList.add('done'), circle.textContent = '✓';
+      else if (i === step) circle.classList.add('active'), circle.textContent = i;
+      else circle.textContent = i;
+    }
+    for (let i = 1; i <= 3; i++) {
+      const line = document.getElementById(`pl${i}`);
+      line.classList.toggle('done', i < step);
+    }
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`step${n}`).classList.add('active');
+    updateProgress(n);
+    window.scrollTo(0, 0);
+  }
+
+  function goBack(n) { showStep(n); }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+    window.scrollTo(0, 0);
+  }
+
+  function goToStep2() {
+    const name = document.getElementById('name').value.trim();
+    const serviceNumber = document.getElementById('serviceNumber').value.trim();
+    const rank = document.getElementById('rank').value;
+    const regiment = document.getElementById('regiment').value.trim();
+
+    if (!name || !serviceNumber || !rank || !regiment) {
+      showError('❌ Please fill all required fields (Name, Service Number, Rank, Regiment)');
+      return;
+    }
+    showStep(2);
+  }
+
+  function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showError('❌ File size must be less than 5MB');
+      return;
+    }
+
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent =
+      (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    document.getElementById('uploadPreview').classList.add('show');
+  }
+
+  function goToStep3() {
+    // Populate review
+    document.getElementById('r-name').textContent =
+      document.getElementById('name').value;
+    document.getElementById('r-service').textContent =
+      document.getElementById('serviceNumber').value;
+    document.getElementById('r-rank').textContent =
+      document.getElementById('rank').value;
+    document.getElementById('r-regiment').textContent =
+      document.getElementById('regiment').value;
+    document.getElementById('r-role').textContent =
+      role.charAt(0).toUpperCase() + role.slice(1);
+    document.getElementById('r-echs').textContent =
+      document.getElementById('echsStatus').value;
+    document.getElementById('r-csd').textContent =
+      document.getElementById('csdEligible').value === 'true' ? 'Yes' : 'No';
+
+    const file = document.getElementById('docFile').files[0];
+    document.getElementById('r-doc').textContent =
+      file ? file.name : 'No document uploaded';
+
+    showStep(3);
+  }
+
+  async function submitIdentity() {
+    const token = localStorage.getItem('kavachToken');
+    if (!token) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="loading"></span> Submitting...';
+    btn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('serviceNumber', document.getElementById('serviceNumber').value);
+      formData.append('rank', document.getElementById('rank').value);
+      formData.append('regiment', document.getElementById('regiment').value);
+      formData.append('role', role);
+      formData.append('echsStatus', document.getElementById('echsStatus').value);
+      formData.append('csdEligible', document.getElementById('csdEligible').value);
+
+      if (role === 'veteran') {
+        formData.append('dischargeYear', document.getElementById('dischargeYear').value);
+        formData.append('ppoNumber', document.getElementById('ppoNumber').value);
+      }
+
+      if (role === 'family') {
+        formData.append('relation', document.getElementById('relation').value);
+        formData.append('linkedServiceNumber',
+          document.getElementById('linkedServiceNumber').value);
+      }
+
+      const file = document.getElementById('docFile').files[0];
+      if (file) formData.append('document', file);
+
+      const res = await fetch('/api/identity/submit', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('kavachCardId', data.data.kavachCardId);
+        localStorage.setItem('kavachIdentity', JSON.stringify(data.data.identity));
+        document.getElementById('cardIdDisplay').textContent = data.data.kavachCardId;
+        showStep(4);
+      } else {
+        showError('❌ ' + data.message);
+      }
+    } catch (err) {
+      showError('❌ Server error. Please try again.');
+    }
+
+    btn.innerHTML = '✅ SUBMIT FOR VERIFICATION';
+    btn.disabled = false;
+  }
+</script>
+
+</body>
+</html>
