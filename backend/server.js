@@ -7,7 +7,7 @@ const cron = require('node-cron');
 const connectDB = require('./config/db');
 const { seedStations, seedInbox } = require('./services/seed.service');
 const { fetchAndStore } = require('./services/news.service');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const app = express();
 
