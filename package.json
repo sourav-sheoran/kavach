@@ -1,0 +1,10 @@
+{
+  "name": "kavach",
+  "version": "1.0.0",
+  "description": "India's First PQC Secured Defence Digital Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "author": "Sourav Sheoran"
+}
